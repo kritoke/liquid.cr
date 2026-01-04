@@ -211,7 +211,11 @@ module Liquid
     # Checks that the underlying value is `String`, and returns its value.
     # Raises otherwise.
     def as_s : String
-      @raw.as(String)
+      if @raw.nil?
+        ""
+      else
+        @raw.as(String)
+      end
     end
 
     # Checks that the underlying value is `String`, and returns its value.

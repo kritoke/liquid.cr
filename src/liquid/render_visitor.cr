@@ -121,7 +121,13 @@ module Liquid
       loop_over_var = node.loop_over
       loop_over = if loop_over_var.is_a?(String)
                     value = Expression.new(loop_over_var).eval(ctx)
-                    value.as_a? || value.as_h? || raise InvalidStatement.new "Can't iterate over #{node.loop_over}"
+                    # Unwrap Liquid::Any before checking if iterable
+                    iterable_value = if value.is_a?(Liquid::Any)
+                                      value.raw
+                                    else
+                                      value
+                                    end
+                    iterable_value.as_a? || iterable_value.as_h? || raise InvalidStatement.new "Can't iterate over #{node.loop_over}"
                   else
                     loop_over_var
                   end

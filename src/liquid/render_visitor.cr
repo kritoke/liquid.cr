@@ -123,11 +123,24 @@ module Liquid
                     value = Expression.new(loop_over_var).eval(ctx)
                     # Unwrap Liquid::Any before checking if iterable
                     iterable_value = if value.is_a?(Liquid::Any)
-                                      value.raw
-                                    else
-                                      value
-                                    end
-                    iterable_value.as_a? || iterable_value.as_h? || raise InvalidStatement.new "Can't iterate over #{node.loop_over}"
+                                       raw = value.raw
+                                       # Handle arrays with any element type, not just Array(Any)
+                                       if raw.is_a?(Array)
+                                         raw
+                                       else
+                                         raw
+                                       end
+                                     else
+                                       value
+                                     end
+                    # Check for Array (any type) or Hash
+                    if iterable_value.is_a?(Array)
+                      iterable_value
+                    elsif iterable_value.is_a?(Hash)
+                      iterable_value
+                    else
+                      raise InvalidStatement.new "Can't iterate over #{node.loop_over}"
+                    end
                   else
                     loop_over_var
                   end

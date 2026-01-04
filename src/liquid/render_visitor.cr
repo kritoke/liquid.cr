@@ -121,15 +121,13 @@ module Liquid
       loop_over_var = node.loop_over
       loop_over = if loop_over_var.is_a?(String)
                     value = Expression.new(loop_over_var).eval(ctx)
-                    # Unwrap Liquid::Any before checking if iterable
+                    # Recursively unwrap all Liquid::Any layers
                     iterable_value = if value.is_a?(Liquid::Any)
-                                       raw = value.raw
-                                       # Handle arrays with any element type, not just Array(Any)
-                                       if raw.is_a?(Array)
-                                         raw
-                                       else
-                                         raw
+                                       current = value
+                                       while current.is_a?(Liquid::Any)
+                                         current = current.raw
                                        end
+                                       current
                                      else
                                        value
                                      end

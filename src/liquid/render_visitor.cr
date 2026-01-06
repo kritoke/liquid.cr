@@ -145,7 +145,7 @@ module Liquid
 
       visitor = RenderVisitor.new(ctx, @io)
       parentloop = ctx["forloop"]?.try(&.raw).as?(ForLoop)
-      forloop = ForLoop.new(loop_over, parentloop)
+      forloop = ForLoop.new(loop_over, parentloop, node.reversed)
 
       ctx.set("forloop", forloop)
       forloop.each do |val|

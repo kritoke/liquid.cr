@@ -4,8 +4,9 @@ module Liquid
   class ForLoop < Drop
     @collection : Array(Any) | Hash(String, Any) | Range(Int32, Int32)
     getter parentloop : ForLoop?
+    property reversed : Bool = false
 
-    def initialize(@collection, @parentloop)
+    def initialize(@collection, @parentloop, @reversed = false)
       @i = 0
     end
 
@@ -13,7 +14,8 @@ module Liquid
     def each(&)
       collection = @collection
       if collection.is_a?(Array) || collection.is_a?(Range)
-        collection.each do |val|
+        iterable = @reversed ? collection.reverse : collection
+        iterable.each do |val|
           yield(val)
           @i += 1
         end

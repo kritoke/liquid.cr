@@ -12,23 +12,25 @@ module Liquid::Block
   # loop.last     	True if last iteration.
   # loop.length    	The number of items in the sequence.
   class For < BeginBlock
-    GLOBAL  = /(?<var>\w+) in (?<range>.+)/
+    GLOBAL  = /(?<var>\w+) in (?<range>.+?)(?:\s+(?<reversed>reversed))?$/
     RANGE   = /(?<start>[0-9]+)\.\.(?<end>[0-9]+)/
     VARNAME = /^\s*(?<varname>#{VAR})\s*$/
 
     getter loop_var : String
     getter loop_over : String | Range(Int32, Int32)
+    getter reversed : Bool = false
 
-    def initialize(@loop_var, begin s, end e)
+    def initialize(@loop_var, begin s, end e, @reversed = false)
       @loop_over = s..e
     end
 
-    def initialize(@loop_var, @loop_over)
+    def initialize(@loop_var, @loop_over, @reversed = false)
     end
 
     def initialize(content : String)
       if gmatch = content.match(GLOBAL)
         @loop_var = gmatch["var"]
+        @reversed = !gmatch["reversed"]?.nil?
         @loop_over = if rmatch = gmatch["range"].match(RANGE)
                        rmatch["start"].to_i..rmatch["end"].to_i
                      elsif (rmatch = gmatch["range"].match VARNAME)

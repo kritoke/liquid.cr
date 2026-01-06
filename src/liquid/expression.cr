@@ -203,6 +203,14 @@ module Liquid
 
     private def call_index(ctx : Context, any : Any, index : Any) : Any
       raw = any.raw
+
+      # Handle nil index gracefully - return empty Any instead of crashing
+      # This prevents "Cast from Nil to String failed" errors when templates
+      # use nil variables as hash indices (e.g., {{ page[field] }} where field is nil)
+      if index.raw.nil?
+        return Any.new(nil)
+      end
+
       return call_hash_method(ctx, raw, index.as_s) if raw.is_a?(Hash)
       return call_drop_method(ctx, raw, index.as_s) if raw.is_a?(Drop)
 

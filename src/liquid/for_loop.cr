@@ -13,11 +13,24 @@ module Liquid
     @[Ignore]
     def each(&)
       collection = @collection
-      if collection.is_a?(Array) || collection.is_a?(Range)
+      if collection.is_a?(Array)
         iterable = @reversed ? collection.reverse : collection
         iterable.each do |val|
           yield(val)
           @i += 1
+        end
+      elsif collection.is_a?(Range)
+        if @reversed
+          # Reverse the range by iterating backwards
+          collection.to_a.reverse.each do |val|
+            yield(val)
+            @i += 1
+          end
+        else
+          collection.each do |val|
+            yield(val)
+            @i += 1
+          end
         end
       else
         collection.each do |key, val|

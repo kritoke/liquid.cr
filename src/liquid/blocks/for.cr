@@ -12,9 +12,10 @@ module Liquid::Block
   # loop.last     	True if last iteration.
   # loop.length    	The number of items in the sequence.
   class For < BeginBlock
-    GLOBAL  = /(?<var>\w+) in (?<range>.+?)(?:\s+(?<reversed>reversed))?$/
-    RANGE   = /(?<start>[0-9]+)\.\.(?<end>[0-9]+)/
-    VARNAME = /^\s*(?<varname>#{VAR})\s*$/
+    GLOBAL     = /(?<var>\w+) in (?<range>.+?)(?:\s+(?<reversed>reversed))?$/
+    RANGE      = /(?<start>[0-9]+)\.\.(?<end>[0-9]+)/
+    RANGE_EXPR = /\((?<expr>.+)\.\.(?<end_expr>.+)\)/
+    VARNAME    = /^\s*(?<varname>#{VAR})\s*$/
 
     getter loop_var : String
     getter loop_over : String | Range(Int32, Int32)
@@ -33,6 +34,9 @@ module Liquid::Block
         @reversed = !gmatch["reversed"]?.nil?
         @loop_over = if rmatch = gmatch["range"].match(RANGE)
                        rmatch["start"].to_i..rmatch["end"].to_i
+                     elsif (rmatch = gmatch["range"].match RANGE_EXPR)
+                       # Range expression like (1..items_max) - keep as string to evaluate later
+                       rmatch[0]
                      elsif (rmatch = gmatch["range"].match VARNAME)
                        rmatch["varname"]
                      else
